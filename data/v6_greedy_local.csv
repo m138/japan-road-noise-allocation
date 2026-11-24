@@ -1,0 +1,7 @@
+method,red,len_pct,iter,accepted,n_out,n_in
+greedy_step0.01,22.08893,10.0053,,,,
+greedy_step0.0025,22.11212,10.0337,,,,
+swap_chunk0.005,22.05749,9.99982,1.0,False,719.0,811.0
+swap_chunk0.001,22.0827,9.99818,2.0,False,150.0,196.0
+swap_chunk0.0002,22.08463,9.99938,3.0,False,33.0,73.0
+local_search_final,22.08893,10.0053,,,,

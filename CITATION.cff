@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this code or the data, please cite them as below."
+title: "japan-road-noise-allocation: code for the allocation of road traffic noise mitigation in Japan"
+authors:
+  - family-names: Matsushita
+    given-names: Daisuke
+    orcid: "https://orcid.org/0000-0002-6765-9366"
+    affiliation: "Osaka Metropolitan University"
+license: MIT
+repository-code: "https://github.com/m138/japan-road-noise-allocation"
+version: "1.0.0"
+doi: "10.5281/zenodo.24504209"
+date-released: "2026-11-25"
+keywords:
+  - road traffic noise
+  - sleep disturbance
+  - low-noise pavement
+  - health impact assessment
+  - environmental justice
+  - Japan

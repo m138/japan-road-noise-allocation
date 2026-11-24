@@ -1,0 +1,27 @@
+model,term,coef,lo,hi,n
+M1 rent only,rent10,1.55,1.441,1.659,208743
+"M2 + road density, log pop density (no interaction)",rent10,0.531,0.459,0.602,208743
+"M2 + road density, log pop density (no interaction)",road_dens,5.19,5.016,5.364,208743
+"M2 + road density, log pop density (no interaction)",log_popdens,0.741,0.64,0.842,208743
+M3 + apartment share (no interaction),rent10,-0.032,-0.143,0.08,208743
+M3 + apartment share (no interaction),road_dens,5.142,4.967,5.316,208743
+M3 + apartment share (no interaction),log_popdens,0.437,0.343,0.53,208743
+M3 + apartment share (no interaction),p_apt,7.419,6.25,8.588,208743
+M4 + apartment-major indicator (no interaction),rent10,-0.035,-0.147,0.078,208743
+M4 + apartment-major indicator (no interaction),road_dens,5.141,4.966,5.315,208743
+M4 + apartment-major indicator (no interaction),log_popdens,0.418,0.323,0.513,208743
+M4 + apartment-major indicator (no interaction),p_apt,8.303,6.855,9.75,208743
+M4 + apartment-major indicator (no interaction),apt_major,-0.617,-1.064,-0.17,208743
+M5 rent x apartment-major (unadjusted),rent10,1.846,1.751,1.941,208743
+M5 rent x apartment-major (unadjusted),apt_major,9.86,8.748,10.971,208743
+M5 rent x apartment-major (unadjusted),rent10_x_apt,-1.449,-1.668,-1.231,208743
+M5 rent x apartment-major (unadjusted),slope_in_apartment_major,0.397,0.207,0.587,208743
+M5 rent x apartment-major (unadjusted),slope_in_detached_major,1.846,1.751,1.941,208743
+"M6 rent x apartment-major + road density, log pop density, apartment share",rent10,0.183,0.008,0.358,208743
+"M6 rent x apartment-major + road density, log pop density, apartment share",apt_major,0.903,-0.263,2.068,208743
+"M6 rent x apartment-major + road density, log pop density, apartment share",rent10_x_apt,-0.309,-0.497,-0.121,208743
+"M6 rent x apartment-major + road density, log pop density, apartment share",road_dens,5.142,4.968,5.316,208743
+"M6 rent x apartment-major + road density, log pop density, apartment share",log_popdens,0.367,0.271,0.464,208743
+"M6 rent x apartment-major + road density, log pop density, apartment share",p_apt,7.371,5.601,9.142,208743
+"M6 rent x apartment-major + road density, log pop density, apartment share",slope_in_apartment_major,-0.126,-0.252,-0.001,208743
+"M6 rent x apartment-major + road density, log pop density, apartment share",slope_in_detached_major,0.183,0.008,0.358,208743

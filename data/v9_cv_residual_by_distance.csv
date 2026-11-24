@@ -1,0 +1,7 @@
+﻿level,stratum,n,mean_meas,mean_pred,mean_residual,se,rmse
+0 m,distance from roadway edge,151.0,58.3113,61.1136,2.8023,0.4522,6.2072
+0.5-2 m,distance from roadway edge,1782.0,59.8356,60.3235,0.4879,0.1111,4.7136
+2-5 m,distance from roadway edge,6790.0,61.6574,61.0927,-0.5648,0.05,4.1577
+5-10 m,distance from roadway edge,2603.0,60.8502,60.7867,-0.0635,0.0853,4.3492
+10-20 m,distance from roadway edge,530.0,57.5151,60.7402,3.2251,0.2489,6.5697
+20 m+,distance from roadway edge,122.0,54.9344,59.4476,4.5132,0.4766,6.9181

@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+data/receptor/
+data/alloc/
+data/adi_small_area_2020.csv
+data/age_small_area_2020.csv
+data/age2_small_area_2020.csv
+census2020_small_area/
+intermediate/
+inputs/
+figures/*.eps
+src/paper/si_tables.md
