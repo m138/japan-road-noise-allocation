@@ -115,6 +115,14 @@ python src/paper/build_si_tables.py                  # Supplementary Tables 1-17
 python src/release/build_release_data.py OUT         # small_area_burden_2020.csv, section_allocation.csv of the data deposit
 ```
 
+Maps of this repository (municipal values, not reported in the paper). `BOUNDARIES` is a GeoJSON file of simplified municipal polygons with the properties `c` (5-digit code), `n` (name) and `pop`; `docs/muni.geojson` of japan-night-road-noise was used.
+
+```
+python src/webmap/muni_summary.py MAT W                                                                    # data/muni_allocation.csv
+python src/webmap/make_readme_map.py data/muni_allocation.csv BOUNDARIES docs/images/map_selected_share.png   # map in the README
+python src/webmap/make_webmap_data.py data/muni_allocation.csv BOUNDARIES docs/muni.geojson                 # data of the interactive map (docs/index.html)
+```
+
 ## Reproducibility checks made for the paper
 
 - The matrix was generated again and was identical in all 47 prefectures.

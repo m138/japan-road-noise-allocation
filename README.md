@@ -4,9 +4,9 @@ Code and result files for the paper "Sleep benefits and neighborhood disparities
 
 The study asks where a limited amount of low-noise pavement should be placed. It links nighttime road traffic noise at 12.3 million population-representative receptors, which cover the whole population of Japan, to the 94,112 census sections of ordinary roads, and compares ways of allocating the same treated length. It uses public data only.
 
-<p align="center"><img src="figures/Fig4.png" width="640" alt="Reduction in excess high sleep disturbance against the disparity ratio and the absolute gap for each allocation of low-noise pavement to 10% of road length"></p>
+<p align="center"><img src="docs/images/map_selected_share.png" width="600" alt="Map of Japan showing, by municipality, the share of the length of ordinary roads selected for low-noise pavement under the efficient allocation"></p>
 
-*Sleep benefit and disparity between neighborhoods when low-noise pavement is allocated to 10% of the length of ordinary roads (Fig. 4 of the paper). Made by `src/paper/make_figures_en.py`.*
+*Share of the length of ordinary roads selected for low-noise pavement, by municipality, when 10% of the national length is treated under the efficient allocation. Interactive map with excess high sleep disturbance, the gap between neighborhoods and the equity-weighted allocation: https://m138.github.io/japan-road-noise-allocation/ . The inset shows Okinawa Island. Map lines delineate study areas and do not necessarily depict accepted national boundaries. Made by `src/webmap/make_readme_map.py`.*
 
 > Status: the paper is under review. Data: https://doi.org/10.5281/zenodo.24503772 . Code (v1.0.0): https://doi.org/10.5281/zenodo.24504209 .
 
@@ -16,6 +16,8 @@ The study asks where a limited amount of low-noise pavement should be placed. It
 - With an assumed 3 dB source reduction, treating the 10% of road length with the largest reduction per unit length reduced excess high sleep disturbance by 22.1%. This is 75% of the benefit of treating all sections (29.6%) and more than seven times the benefit of the random allocation (2.9%).
 - Weighting reductions in neighborhoods with higher renter shares (equity-weighted allocation, γ = 16) kept about 97% of that benefit (21.5%), lowered the disparity ratio from 1.63 to 1.52 and the absolute gap from 5.2 to 4.5 per 1,000 adults. Selection by renter share alone gave a reduction of 14.1% and an absolute gap of 4.7.
 - A simple rule that ranks sections by the adult population within 200 m per unit length obtained 95% of the benefit of the efficient allocation.
+
+Figures 1–4 of the paper are in `figures/` (the sleep benefit and the disparity of each allocation are in `figures/Fig4.png`) and are made by `src/paper/make_figures_en.py`.
 
 ## Get the results (no need to run the model)
 
@@ -56,6 +58,7 @@ The exposure estimates come from two earlier models, which are needed for a full
 4. Allocates the measure to sections by sequential maximization of the marginal benefit per unit length, in steps of 1% of road length, with an equity weight γ on avoided cases in neighborhoods with higher renter shares (`src/targeted/greedy_alloc.py`).
 5. Runs sensitivity analyses: budget units, continuous treatment units, pavement performance (ASJ RTN-Model 2018, rolling noise only), heavy-vehicle reduction, receptor placement on building land, corrections of model bias and a simple roadside-population rule (`src/targeted/`).
 6. Propagates the uncertainty of exposure, exposure–response slope and pavement effect by Monte Carlo simulation with 1,000 runs (`src/mc/`).
+7. Maps for this repository (`src/webmap/`): `muni_summary.py` sums the results of the two main allocations by municipality (`data/muni_allocation.csv`), `make_readme_map.py` draws the map above and `make_webmap_data.py` makes `docs/muni.geojson` for the interactive map in `docs/index.html`. The interactive map shows, by municipality, excess high sleep disturbance, the gap between neighborhoods with the highest and lowest renter shares, the share of road length selected and the reduction under the efficient and the equity-weighted allocation. These municipal values are not reported in the paper.
 
 Comments in the code are in English. Some string constants are in Japanese because they are column names of the source tables (census and Road Traffic Census) or labels in result files.
 
