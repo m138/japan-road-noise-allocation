@@ -1,17 +1,20 @@
-"""English Figures 1-4 (EPS and PNG) of the paper.
+"""English Figures 1-4 (PNG, PDF and EPS) of the paper.
 
 Inputs: data/ under F_ROOT (default: current directory).
-Outputs: figures/Fig{1..4}.{eps,png}
-Font: Arial if it is installed, otherwise Liberation Sans (metric-compatible with Arial; the submitted figures use it). Set F_FONT to choose another font. Text stays as text
-(EPS Type 42, no outlines), so labels can be edited. EPS has no transparency, so maps are composed as
+Outputs: figures/Fig{1..4}.{png,pdf,eps}
+Font: Arial if it is installed, otherwise Liberation Sans (metric-compatible with Arial; the submitted figures use it). Set F_FONT to choose another font.
+PDF: text stays as text (embedded TrueType, Type 42), so labels can be edited, for example in Adobe Illustrator.
+EPS: text is drawn as outlines. Illustrator does not display the Type 42 text that Matplotlib writes to EPS files, so the EPS files
+do not depend on fonts; use the PDF files when labels have to be edited. EPS has no transparency, so maps are composed as
 opaque RGB images.
 usage: python3 make_figures_en.py [1 2 3 4]
 """
-import os, sys, numpy as np, pandas as pd
+import os, sys, inspect, numpy as np, pandas as pd
 import matplotlib as mpl; mpl.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap, Normalize
 from matplotlib.cm import ScalarMappable
+from matplotlib.backends.backend_ps import RendererPS
 
 B = os.environ.get('F_ROOT','.') + '/'
 HERE = os.path.dirname(os.path.abspath(__file__)); OUT = os.path.join(B, 'figures'); os.makedirs(OUT, exist_ok=True)
@@ -21,7 +24,7 @@ def pick_font():
         try: font_manager.findfont(f, fallback_to_default=False); return f
         except ValueError: pass
     return 'DejaVu Sans'
-FONT = pick_font(); print('font:', FONT)
+FONT = pick_font(); print('make_figures_en.py, version of 2026-11-25 (PNG, PDF, EPS)'); print('font:', FONT)
 mpl.rcParams.update({'font.family': FONT, 'font.size': 7, 'axes.titlesize': 7.5, 'axes.labelsize': 7, 'xtick.labelsize': 6.5, 'ytick.labelsize': 6.5,
     'legend.fontsize': 6.5, 'axes.edgecolor': '#c3c2b7', 'axes.linewidth': 0.6, 'xtick.color': '#52514e', 'ytick.color': '#52514e', 'axes.labelcolor': '#0b0b0b',
     'xtick.major.width': 0.6, 'ytick.major.width': 0.6, 'xtick.major.size': 2.5, 'ytick.major.size': 2.5, 'axes.spines.top': False, 'axes.spines.right': False,
@@ -35,9 +38,17 @@ MM = 1 / 25.4
 META_PNG = {'Software': None}
 
 
+_N_AS_PATH = len(inspect.signature(RendererPS._draw_text_as_path).parameters) - 1   # 7 or 8 arguments, depending on the Matplotlib version
+def _text_as_outlines(self, gc, x, y, s, prop, angle, ismath=False, mtext=None):
+    self._draw_text_as_path(*(gc, x, y, s, prop, angle, ismath, mtext)[:_N_AS_PATH])
+
+
 def save(fig, name):
     fig.savefig(f'{OUT}/{name}.png', metadata=META_PNG)
-    fig.savefig(f'{OUT}/{name}.eps', metadata={'Creator': ''})
+    fig.savefig(f'{OUT}/{name}.pdf', metadata={'Creator': None, 'Producer': None, 'CreationDate': None})   # text as text (editable)
+    draw_text = RendererPS.draw_text; RendererPS.draw_text = _text_as_outlines                                # EPS: text as outlines
+    try: fig.savefig(f'{OUT}/{name}.eps', metadata={'Creator': ''})
+    finally: RendererPS.draw_text = draw_text
     plt.close(fig)
 
 

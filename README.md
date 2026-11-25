@@ -34,7 +34,7 @@ The same deposit has `source_data/`, the result files behind every figure and su
 
 ```
 pip install -r requirements.txt
-python src/paper/make_figures_en.py      # figures/Fig1-4 (.png, .eps)
+python src/paper/make_figures_en.py      # figures/Fig1-4 (.png, .pdf with editable text, .eps with outlined text)
 python src/paper/build_si_tables.py      # src/paper/si_tables.md (Supplementary Tables 1-17)
 python src/mc/mc_v5_summary.py           # summary of the 1,000 Monte Carlo runs (data/v5_mc_summary.csv)
 ```
