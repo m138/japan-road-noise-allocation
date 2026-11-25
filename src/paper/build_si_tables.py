@@ -151,7 +151,7 @@ CHECK['t6c'] = rows; CHECK['cap_total_change_pct'] = 100 * (C.loc['none', 'HSD0'
 
 # ---------------------------------------------------------------- Table 7
 title(7, 'Reduction of nighttime heavy-vehicle traffic by 50% (10% of road length) and the co-benefit for NO2.',
-      'No shift of traffic to other hours or routes is assumed. Deaths attributable to near-road NO2 (age 30 years and over, relative risk 1.02 per 10 µg m⁻³) were recalculated after the fall in nighttime heavy-vehicle NOx emissions was applied to the near-road term of the NO2 model. Sections were selected by the reduction in excess HSD only. NO2 deaths were not calculated for γ = 16.')
+      'No shift of traffic to other hours or routes is assumed. Deaths attributable to near-road NO2 (age 30 years and over, relative risk 1.02 per 10 µg m⁻³) were recalculated after the fall in nighttime heavy-vehicle NOx emissions was applied to the near-road term of the NO2 model. Sections were selected by the reduction in excess HSD only.')
 N = pd.read_csv(B + 'v5_no2_heavy.csv').set_index('scenario'); A5 = pd.read_csv(B + 'v5_alloc_opt.csv'); A5 = A5[(A5.budget == 10) & (A5.measure == 'hv')].set_index('method')
 h = RND[RND.measure == 'hv']; allh = Q.loc[('hv', 'all')]
 def r7(lab, red, ratio, gap, nk):
@@ -159,7 +159,7 @@ def r7(lab, red, ratio, gap, nk):
 rows = [r7('Efficient allocation (γ = 0)', Q.loc[('hv', 'gamma0'), 'red_pct'], Q.loc[('hv', 'gamma0'), 'ratio'], Q.loc[('hv', 'gamma0'), 'gap'], 'opt_g0_b10'),
         r7('Equity-weighted, γ = 1', Q.loc[('hv', 'gamma1'), 'red_pct'], Q.loc[('hv', 'gamma1'), 'ratio'], Q.loc[('hv', 'gamma1'), 'gap'], 'opt_g1_b10'),
         r7('Equity-weighted, γ = 4', Q.loc[('hv', 'gamma4'), 'red_pct'], Q.loc[('hv', 'gamma4'), 'ratio'], Q.loc[('hv', 'gamma4'), 'gap'], 'opt_g4_b10'),
-        r7('Equity-weighted, γ = 16', Q.loc[('hv', 'gamma16'), 'red_pct'], Q.loc[('hv', 'gamma16'), 'ratio'], Q.loc[('hv', 'gamma16'), 'gap'], None),
+        r7('Equity-weighted, γ = 16', Q.loc[('hv', 'gamma16'), 'red_pct'], Q.loc[('hv', 'gamma16'), 'ratio'], Q.loc[('hv', 'gamma16'), 'gap'], 'opt_g16_b10'),
         r7('Renter-share-only allocation', A5.loc['old_rent', 'reduction_pct'], A5.loc['old_rent', 'ratio'], A5.loc['old_rent', 'diff'], 'old_rent_b10'),
         r7('Random allocation (mean of 100 orders; NO2 for one order)', h.red.mean(), h.ratio.mean(), h.gap.mean(), 'old_random00_b10'),
         r7('All sections treated', allh.red_pct, allh.ratio, allh.gap, 'all_b100')]
@@ -180,7 +180,7 @@ table(['Data', 'Content and year', 'Use in this study', 'Source'], [
 
 # ---------------------------------------------------------------- Table 9
 title(9, 'Small-area regressions of excess HSD on renter share.',
-      'Outcome: excess HSD per 1,000 adults in each small area (n = 208,743). Weighted least squares with population weights and municipality fixed effects; 95% confidence intervals from standard errors clustered by municipality. Renter share and apartment share are entered per 10 percentage points and per unit (0–1), respectively. Road density: length of census ordinary-road sections (km per km²). "Mainly apartment": small areas where detached houses are less than half of main households (47,841 small areas, 39% of the population).')
+      'Outcome: excess HSD per 1,000 adults in each small area (n = 208,743). Weighted least squares with population weights and municipality fixed effects; 95% confidence intervals from standard errors clustered by municipality. Renter share and apartment share are entered per 10 percentage points and per unit (0–1), respectively. Road density: length of census ordinary-road sections (km per km²). "Mainly apartment": small areas where detached houses are less than half of main households (47,841 small areas, 39% of the population; apartment buildings are half or more of main households for 95% of this population).')
 HR = pd.read_csv(B + 'v8_housing_regression.csv')
 TERM = {'rent10': 'Renter share (per 10 points)', 'road_dens': 'Road density (km per km²)', 'log_popdens': 'Log population density', 'p_apt': 'Apartment share (0–1)', 'apt_major': 'Mainly apartment (indicator)',
         'rent10_x_apt': 'Renter share × mainly apartment', 'slope_in_apartment_major': 'Slope of renter share in mainly-apartment areas', 'slope_in_detached_major': 'Slope of renter share in mainly-detached areas'}
@@ -295,10 +295,10 @@ table(['Allocation', 'Sections', 'Reduction (%)', 'Share of all-sections benefit
 title(17, 'Disability-adjusted life years (DALYs) for the two health outcomes assessed.',
       'Central estimates per year. The comparison is limited to the two outcomes of this study and does not cover all health effects of road traffic. YLD: excess HSD in adults × disability weight, treating the estimated state as lasting one year. YLL: deaths × 9.9 years, the mean remaining life expectancy at death for deaths at age 30 years and over (2022 abridged life table and 2022 deaths by five-year age group, both sexes combined).')
 hsd = Q.loc[('pav', 'none'), 'HSD0']; D = 6460.0; DJ = MC.loc['H_base', 'jcurve']
-table(['Outcome and assumption', 'Cases or deaths per year', 'DALYs per year'], [
+table(['Outcome and assumption', 'Adults with excess HSD or deaths per year', 'DALYs per year'], [
     ['Excess HSD in adults, WHO curve, disability weight 0.010 (ref. [[whodw2024]])', f(hsd, 0), f(hsd * 0.010, 0)],
     ['Same, disability weight 0.006 to 0.015 (95% uncertainty interval of the weight)', f(hsd, 0), f'{f(hsd * 0.006, 0)} to {f(hsd * 0.015, 0)}'],
-    ['Same, disability weight 0.07 (WHO, 2011)', f(hsd, 0), f(hsd * 0.07, 0)],
+    ['Same, disability weight 0.07 used in an earlier assessment (ref. [[who2011]])', f(hsd, 0), f(hsd * 0.07, 0)],
     ['Excess HSD in adults, Japanese curve (ref. [[morinaga2025]]), disability weight 0.010', f(DJ, 0), f(DJ * 0.010, 0)],
     ['Deaths attributable to near-road NO2, age 30 years and over, relative risk 1.02 per 10 µg m⁻³ (ref. [[huangfu2020]]), 9.9 years per death', '6,460', '63,800'],
     ['Same, years of life lost summed by age group in each small area', '6,460', '64,300'],

@@ -28,7 +28,7 @@ mpl.rcParams.update({'font.family': FONT, 'font.size': 7, 'axes.titlesize': 7.5,
     'figure.facecolor': 'white', 'axes.facecolor': 'white', 'savefig.dpi': 600, 'pdf.fonttype': 42, 'ps.fonttype': 42, 'axes.unicode_minus': True, 'legend.frameon': False,
     'mathtext.fontset': 'custom', 'mathtext.rm': FONT, 'mathtext.it': FONT + ':italic', 'mathtext.bf': FONT + ':bold', 'mathtext.default': 'regular'})
 INK = '#0b0b0b'; INK2 = '#52514e'; MUTED = '#898781'; GRID = '#e1e0d9'
-BLUE = '#2a78d6'; ORANGE = '#eb6834'; AQUA = '#1baf7a'; VIOLET = '#6250d6'; GRAY = '#898781'; LBLUE = '#86b6ef'
+BLUE = '#2a78d6'; ORANGE = '#eb6834'; AQUA = '#1baf7a'; VIOLET = '#6250d6'; GRAY = '#898781'; LBLUE = '#86b6ef'; OCHRE = '#c98500'
 BLUES = LinearSegmentedColormap.from_list('b', ['#cde2fb', '#86b6ef', '#3987e5', '#256abf', '#184f95', '#0d366b'])
 ORANGES = LinearSegmentedColormap.from_list('o', ['#fde6da', '#f6b393', '#ef8a5d', '#eb6834', '#b9461b', '#7a2c0f'])
 MM = 1 / 25.4
@@ -115,10 +115,10 @@ def fig2():
           'Per 1,000 adults', r'$\bf{a}$   Excess high sleep disturbance', 20, [0.3, -0.3])
     lines(axs[1], [('Renter\nshare', g('p_rent', 'all', 'NO2D_std_per100k30'), INK, '-', 'o'), ('ADI', g('ADI_raw', 'all', 'NO2D_std_per100k30'), MUTED, '--', 's')],
           'Per 100,000 aged ≥30 years\n(common national death rate)', r'$\bf{b}$   Deaths attributable to near-road NO$_2$', 10, [0.45, -0.45])
-    lines(axs[2], [('Mainly\ndetached', g('p_rent', 'detached_major', 'HSD_per1000adult'), VIOLET, '-', 'o'), ('Mainly\napartment', g('p_rent', 'apartment_major', 'HSD_per1000adult'), '#c98500', '-', 'D'),
-                   ('All', g('p_rent', 'all', 'HSD_per1000adult'), MUTED, ':', '')], 'Per 1,000 adults', r'$\bf{c}$   Sleep disturbance by housing type', 25, [-1.2, 2.3, -0.9], 7.6)
+    lines(axs[2], [('Mainly detached\n(detached ≥50%)', g('p_rent', 'detached_major', 'HSD_per1000adult'), VIOLET, '-', 'o'), ('Mainly apartment\n(detached <50%)', g('p_rent', 'apartment_major', 'HSD_per1000adult'), '#c98500', '-', 'D'),
+                   ('All', g('p_rent', 'all', 'HSD_per1000adult'), MUTED, ':', '')], 'Per 1,000 adults', r'$\bf{c}$   Sleep disturbance by housing type', 25, [-1.2, 2.3, -0.9], 8.0)
     for ax in axs[:2]: ax.text(0, 1.02, 'Within-municipality quintiles of small areas', transform=ax.transAxes, fontsize=5.8, color=MUTED)
-    axs[2].text(0, 1.02, 'Small areas stratified by main housing type', transform=axs[2].transAxes, fontsize=5.8, color=MUTED)
+    axs[2].text(0, 1.02, 'Small areas by share of detached houses', transform=axs[2].transAxes, fontsize=5.8, color=MUTED)
     for ax in axs: ax.set_xlabel('Within-municipality quintile of renter share or ADI' if ax is not axs[2] else 'Within-municipality quintile of renter share', fontsize=6.5)
     save(fig, 'Fig2')
 
@@ -172,12 +172,18 @@ def fig4():
         ax.set_xlim(*xlim); ax.set_ylim(*ylim); ax.set_xlabel(xl); ax.set_ylabel('Reduction in excess high sleep disturbance (%)')
         ax.yaxis.grid(True, color=GRID, lw=0.5); ax.xaxis.grid(True, color=GRID, lw=0.5); ax.set_axisbelow(True)
         ax.set_title(title, loc='left', fontsize=7.5, color=INK, pad=4)
-    def trade(ax, meas, xcol, allx, ally, big=True, g16left=False, all_left=False):
+    POPD = pd.read_csv(B + 'data/v10_popdensity_rule.csv').set_index('name').loc['adults200m_per_length']   # simple roadside-population rule (Supplementary Table 16)
+    def trade(ax, meas, xcol, allx, ally, big=True, g16left=False, all_left=False, simple=False):
         x = curve(meas, xcol); y = curve(meas, 'reduction_pct')
         ax.plot(x, y, color=LBLUE, lw=1.4, zorder=3); ax.scatter(x[1:-1], y[1:-1], s=10, color=LBLUE, ec='white', lw=0.5, zorder=4)
         s = 40 if big else 22; fs = 7 if big else 6.5
         ax.scatter([x[0]], [y[0]], s=s, color=BLUE, ec='white', lw=0.7, zorder=5); ax.scatter([x[-1]], [y[-1]], s=s, color=ORANGE, ec='white', lw=0.7, zorder=5)
-        ax.annotate('Efficient (γ = 0)', (x[0], y[0]), xytext=(4, -11), textcoords='offset points', fontsize=fs, color=INK, ha='left')
+        mask = dict(boxstyle='square,pad=0.15', fc='white', ec='none') if (simple and xcol == 'ratio') else None   # hides the dashed line behind the labels in panel a
+        ax.annotate('Efficient (γ = 0)', (x[0], y[0]), xytext=(7, 1) if simple else (4, -11), textcoords='offset points', fontsize=fs, color=INK, ha='left', va='center' if simple else 'baseline', bbox=mask)
+        if simple:
+            sx, sy = POPD[{'ratio': 'ratio', 'diff': 'gap'}[xcol]], POPD.red
+            ax.scatter([sx], [sy], s=s * 0.8, marker='P', color=OCHRE, ec='white', lw=0.6, zorder=6)
+            ax.annotate('Simple roadside-\npopulation rule', (sx, sy), xytext=(6, -3), textcoords='offset points', fontsize=6.8, color=INK2, ha='left', va='top', linespacing=1.1, bbox=mask)
         ax.annotate('Equity-weighted (γ = 16)', (x[-1], y[-1]), xytext=(-7, -3) if g16left else (-4, -11), textcoords='offset points', fontsize=fs, color=INK,
                     ha='right' if (g16left or not big) else 'center', va='center' if g16left else 'baseline')
         pts = [('Renter-share-only', pt(meas, 'old_rent', xcol), pt(meas, 'old_rent', 'reduction_pct'), AQUA, 'D'),
@@ -197,31 +203,31 @@ def fig4():
                         textcoords='offset points', fontsize=6.8 if big else 6.5, color=INK2, va='bottom' if U else 'top', linespacing=1.1)
         return x, y
     # a
-    frame(axa, r'$\bf{a}$   Low-noise pavement: sleep benefit and disparity ratio', 'Disparity ratio (Q5/Q1 of renter share, rate per adult)', (1.40, 1.80), (0, 35), base_ratio)
-    x, y = trade(axa, 'pav', 'ratio', 1.7085, 29.5867, all_left=True)
+    frame(axa, r'$\bf{a}$   Low-noise pavement: sleep benefit and disparity ratio', 'Disparity ratio (excess HSD rate, Q5/Q1 by renter share)', (1.40, 1.80), (0, 35), base_ratio)
+    x, y = trade(axa, 'pav', 'ratio', 1.7085, 29.5867, all_left=True, simple=True)
     axa.annotate('', xy=(x[-1], y[-1] + 1.0), xytext=(x[0], y[0] + 1.0), arrowprops=dict(arrowstyle='-|>', color=INK, lw=1.1, mutation_scale=9, connectionstyle='arc3,rad=0.12'))
     axa.text(0.03, 0.975, 'Central estimate: efficient → γ = 16', transform=axa.transAxes, fontsize=7, color=INK, va='top')
-    axa.text(0.03, 0.895, 'Sleep benefit', transform=axa.transAxes, fontsize=7, color=INK2, va='top')
-    axa.text(0.03, 0.855, '−2.7%', transform=axa.transAxes, fontsize=15, color=INK, va='top')
-    axa.text(0.03, 0.765, '22.1% → 21.5%', transform=axa.transAxes, fontsize=7, color=INK2, va='top')
-    axa.text(0.33, 0.895, 'Disparity ratio', transform=axa.transAxes, fontsize=7, color=INK2, va='top')
-    axa.text(0.33, 0.855, '−0.11', transform=axa.transAxes, fontsize=15, color=INK, va='top')
-    axa.text(0.33, 0.765, '1.63 → 1.52', transform=axa.transAxes, fontsize=7, color=INK2, va='top')
-    axa.text(0.97, 0.11, 'Uncertainty (sections fixed to the main selection;\n2.5th–97.5th percentiles of within-run differences)\nSleep benefit −2.6 to −2.8%\nDisparity ratio −0.15 to −0.07',
+    axa.text(0.03, 0.905, 'Relative loss in\nsleep benefit', transform=axa.transAxes, fontsize=7, color=INK2, va='top', linespacing=1.1)
+    axa.text(0.03, 0.835, '2.7%', transform=axa.transAxes, fontsize=14, color=INK, va='top')
+    axa.text(0.03, 0.75, '22.1% → 21.5%', transform=axa.transAxes, fontsize=7, color=INK2, va='top')
+    axa.text(0.33, 0.905, 'Change in\ndisparity ratio', transform=axa.transAxes, fontsize=7, color=INK2, va='top', linespacing=1.1)
+    axa.text(0.33, 0.835, '−0.11', transform=axa.transAxes, fontsize=14, color=INK, va='top')
+    axa.text(0.33, 0.75, '1.63 → 1.52', transform=axa.transAxes, fontsize=7, color=INK2, va='top')
+    axa.text(0.97, 0.11, 'Uncertainty (sections fixed to the main selection;\n2.5th–97.5th percentiles of within-run differences)\nRelative loss in sleep benefit 2.6 to 2.8%\nChange in disparity ratio −0.15 to −0.07',
              transform=axa.transAxes, fontsize=6.3, color=INK2, va='bottom', ha='right', multialignment='left', linespacing=1.35, bbox=dict(boxstyle='round,pad=0.45', fc='white', ec='#c3c2b7', lw=0.6))
     # b
     frame(axb, r'$\bf{b}$   Low-noise pavement: sleep benefit and absolute gap', 'Absolute gap (Q5 − Q1, per 1,000 adults)', (2.0, 7.7), (0, 35), base_gap, left=True)
-    x, y = trade(axb, 'pav', 'diff', 5.1072, 29.5867, g16left=True)
+    x, y = trade(axb, 'pav', 'diff', 5.1072, 29.5867, g16left=True, simple=True)
     g16x, g16y = x[-1], y[-1]; rx, ry = pt('pav', 'old_rent', 'diff'), pt('pav', 'old_rent', 'reduction_pct')
     axb.add_patch(plt.Rectangle((g16x, 0), 7.7 - g16x, g16y, color='#f0efec', lw=0, zorder=1))
     axb.text(5.0, 9.5, 'Larger gap and smaller\nreduction than γ = 16', fontsize=6.5, color=MUTED, ha='left', va='top')
     axb.annotate('', xy=(g16x + 0.03, g16y - 1.2), xytext=(rx - 0.02, ry + 1.0), arrowprops=dict(arrowstyle='-|>', color=INK, lw=1.0, mutation_scale=9))
     axb.text(0.03, 0.975, 'Central estimate: γ = 16 and renter-share-only', transform=axb.transAxes, fontsize=7, color=INK, va='top')
-    axb.text(0.03, 0.905, 'Absolute gap (per 1,000 adults)', transform=axb.transAxes, fontsize=7, color=INK2, va='top')
-    axb.text(0.03, 0.875, '4.5 < 4.7', transform=axb.transAxes, fontsize=15, color=INK, va='top')
-    axb.text(0.03, 0.79, 'Sleep benefit', transform=axb.transAxes, fontsize=7, color=INK2, va='top')
-    axb.text(0.03, 0.76, '21.5% > 14.1%', transform=axb.transAxes, fontsize=15, color=INK, va='top')
-    axb.text(0.03, 0.675, 'Smaller gap and larger benefit with γ = 16', transform=axb.transAxes, fontsize=7, color=INK2, va='top')
+    axb.text(0.03, 0.915, 'Absolute gap (per 1,000 adults)', transform=axb.transAxes, fontsize=7, color=INK2, va='top')
+    axb.text(0.03, 0.887, '4.5 < 4.7', transform=axb.transAxes, fontsize=14, color=INK, va='top')
+    axb.text(0.03, 0.81, 'Sleep benefit', transform=axb.transAxes, fontsize=7, color=INK2, va='top')
+    axb.text(0.03, 0.782, '21.5% > 14.1%', transform=axb.transAxes, fontsize=14, color=INK, va='top')
+    axb.text(0.03, 0.705, 'Smaller gap and larger benefit with γ = 16', transform=axb.transAxes, fontsize=7, color=INK2, va='top')
     gx = V7.loc['absgap_only']
     axb.scatter([gx.rent_gap], [gx.red], s=32, marker='o', color=VIOLET, ec='white', lw=0.6, zorder=5)
     axb.annotate('Gap-only', (gx.rent_gap, gx.red), xytext=(-4, -7), textcoords='offset points', fontsize=6.8, color=INK2, va='top')

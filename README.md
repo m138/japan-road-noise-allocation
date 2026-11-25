@@ -12,9 +12,9 @@ The study asks where a limited amount of low-noise pavement should be placed. It
 
 ## Main results
 
-- Excess high sleep disturbance from nighttime road traffic noise affected 1.52 million adults (95% interval 1.07–2.09 million). The rate was 1.71 times higher in neighborhoods with the highest renter shares than in those with the lowest in the same municipality (17.4 versus 10.2 per 1,000 adults).
+- An estimated 1.52 million adults had excess high sleep disturbance from nighttime road traffic noise (95% interval 1.07–2.09 million). When neighborhoods were ranked by renter share within each municipality and pooled across the country, the rate in those with the highest renter shares was 1.71 times that in those with the lowest (17.4 versus 10.2 per 1,000 adults).
 - With an assumed 3 dB source reduction, treating the 10% of road length with the largest reduction per unit length reduced excess high sleep disturbance by 22.1%. This is 75% of the benefit of treating all sections (29.6%) and more than seven times the benefit of the random allocation (2.9%).
-- Weighting reductions in neighborhoods with higher renter shares (equity-weighted allocation, γ = 16) kept about 97% of that benefit (21.5%), lowered the disparity ratio from 1.63 to 1.52 and the absolute gap from 5.2 to 4.5 per 1,000 adults. Selection by renter share alone gave a reduction of 14.1% and an absolute gap of 4.7.
+- Weighting reductions in neighborhoods with higher renter shares (equity-weighted allocation, γ = 16) kept about 97% of the benefit of this efficient allocation (21.5% versus 22.1%), lowered the disparity ratio from 1.63 to 1.52 and the absolute gap from 5.2 to 4.5 per 1,000 adults. Selection by renter share alone gave a reduction of 14.1% and an absolute gap of 4.7.
 - A simple rule that ranks sections by the adult population within 200 m per unit length obtained 95% of the benefit of the efficient allocation.
 
 Figures 1–4 of the paper are in `figures/` (the sleep benefit and the disparity of each allocation are in `figures/Fig4.png`) and are made by `src/paper/make_figures_en.py`.

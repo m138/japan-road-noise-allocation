@@ -16,7 +16,7 @@ n12=sum((N[f'{p}24l']-N[f'{p}12l']).clip(lower=0).fillna(0) for p in ('u','d')).
 K['dq_unit']=0.5*n12*nshare*nl2.ef(K.Vl.values,'large',2020,EFP)     # g/km/day removed if selected
 SC=pd.read_parquet(B+'data/alloc/section_scenarios.parquet',columns=['id','random00_b10','rent_b10','all']); SC['id']=SC.id.astype(str)
 OR=pd.read_parquet(B+'data/alloc/v5_opt_orders.parquet'); OR['id']=OR.id.astype(str)
-sel={'opt_g0_b10':OR.set_index('id').hv_order_g0.between(0,9),'opt_g1_b10':OR.set_index('id').hv_order_g1.between(0,9),'opt_g4_b10':OR.set_index('id').hv_order_g4.between(0,9),
+sel={'opt_g0_b10':OR.set_index('id').hv_order_g0.between(0,9),'opt_g1_b10':OR.set_index('id').hv_order_g1.between(0,9),'opt_g4_b10':OR.set_index('id').hv_order_g4.between(0,9),'opt_g16_b10':OR.set_index('id').hv_order_g16.between(0,9),
      'old_rent_b10':SC.set_index('id').rent_b10.astype(bool),'old_random00_b10':SC.set_index('id').random00_b10.astype(bool),'all_b100':SC.set_index('id')['all'].astype(bool)}
 qcols=['nox_gkmd']
 for k,s in sel.items(): K['dq_'+k]=K.dq_unit*s.reindex(K.id.values).fillna(False).values.astype(float); qcols.append('dq_'+k)
