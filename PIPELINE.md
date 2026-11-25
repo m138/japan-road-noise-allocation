@@ -121,6 +121,7 @@ Maps of this repository (municipal values, not reported in the paper). `BOUNDARI
 python src/webmap/muni_summary.py MAT W                                                                    # data/muni_allocation.csv
 python src/webmap/make_readme_map.py data/muni_allocation.csv BOUNDARIES docs/images/map_selected_share.png   # map in the README
 python src/webmap/make_webmap_data.py data/muni_allocation.csv BOUNDARIES docs/muni.geojson                 # data of the interactive map (docs/index.html)
+python src/webmap/make_grid_data.py $F_RECEPTORS data/receptor/receptor_burden_v2.parquet docs               # data of the grid map (docs/grid.html)
 ```
 
 ## Reproducibility checks made for the paper

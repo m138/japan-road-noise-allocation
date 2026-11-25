@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Japan Road Noise and NO2 Grid Map</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<style>
+/* Layout: header, control bar, full-height map and a side panel that drops below the map on phones */
+:root{
+  color-scheme:light;
+  --bg:#f7f8fa; --panel:#ffffff; --fg:#14202e; --muted:#5b6675; --line:#d9dee5; --accent:#1f5fae; --hl:#e8590c; --few:#e1e0d9;
+  --sans:"Noto Sans JP","Hiragino Sans","Yu Gothic UI",system-ui,sans-serif;
+  --num:"IBM Plex Mono",ui-monospace,monospace;
+}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;font-size:14px;background:var(--bg);color:var(--fg);font-family:var(--sans);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+header{padding-block:12px 8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-wrap:wrap;gap:6px 20px;align-items:baseline;border-bottom:1px solid var(--line);background:var(--panel)}
+h1{font-size:1.15rem;margin:0;font-weight:700;text-wrap:balance}
+header p{margin:0;color:var(--muted);font-size:.82rem}
+.controls{padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;background:var(--panel);border-bottom:1px solid var(--line)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:.82rem;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--fg);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--panel)}
+.chip:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--hl);outline-offset:2px}
+.al{display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--muted)}
+select{font:inherit;font-size:.82rem;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)}
+input[type=range]{width:110px;accent-color:var(--accent)}
+.other{margin-left:auto;font-size:.82rem}
+a{color:var(--accent)}
+main{flex:1;display:grid;grid-template-columns:1fr 320px;min-height:0}
+#mapwrap{position:relative;min-height:0}
+#map{position:absolute;inset:0;background:#fff;font-family:var(--sans)}
+#map .grid-tile{image-rendering:pixelated}
+#legend{position:absolute;left:12px;bottom:26px;z-index:500;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:.78rem;max-width:230px}
+#legend b{display:block;font-weight:600;margin-bottom:6px}
+#legend .bar{height:11px;border-radius:2px;width:200px}
+#legend .ticks{display:flex;justify-content:space-between;width:200px;font-family:var(--num);font-size:.72rem;margin-top:2px}
+#legend .row{display:flex;align-items:center;gap:7px;margin-top:5px;color:var(--muted)}
+#legend i{width:22px;height:11px;display:inline-block;border-radius:2px;border:1px solid var(--line);box-sizing:border-box}
+aside{border-left:1px solid var(--line);background:var(--panel);padding:14px 16px;overflow:auto;font-size:.85rem;min-width:0}
+aside h2{font-size:1rem;margin:0 0 2px}
+aside .sub{color:var(--muted);font-size:.78rem;margin-bottom:10px}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+td{padding:5px 0;border-bottom:1px solid var(--line);vertical-align:top}
+td:last-child{text-align:right;font-family:var(--num);white-space:nowrap;padding-left:8px}
+tr.on td{color:var(--accent);font-weight:600}
+.note{color:var(--muted);font-size:.76rem;line-height:1.6;margin-top:14px}
+.note p{margin:0 0 8px}
+@media (max-width:760px){
+  main{grid-template-columns:1fr;grid-template-rows:minmax(360px,62vh) auto}
+  aside{border-left:0;border-top:1px solid var(--line)}
+  .other{margin-left:0}
+  #legend .bar,#legend .ticks{width:150px}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Nighttime road traffic noise and near-road NO<sub>2</sub> in Japan</h1>
+  <p>Population-weighted means of 12.3 million receptors in grid cells of about 0.4 km</p>
+</header>
+<div class="controls">
+  <div class="chips" role="group" aria-label="Indicator">
+    <button class="chip" data-ind="lnight" aria-pressed="true">Nighttime noise</button>
+    <button class="chip" data-ind="no2" aria-pressed="false">Near-road NO<sub>2</sub></button>
+  </div>
+  <label class="al">Go to
+    <select id="place" aria-label="Go to a place">
+      <option value="japan">Japan</option><option value="tokyo">Tokyo</option><option value="osaka">Osaka</option><option value="nagoya">Nagoya</option>
+      <option value="fukuoka">Fukuoka</option><option value="sapporo">Sapporo</option><option value="sendai">Sendai</option><option value="hiroshima">Hiroshima</option><option value="naha">Naha</option>
+    </select>
+  </label>
+  <label class="al">Opacity <input type="range" id="opacity" min="20" max="100" value="100" aria-label="Opacity of the grid"></label>
+  <label class="al"><input type="checkbox" id="base" checked> Background map</label>
+  <a class="other" href="./">Map by municipality</a>
+</div>
+<main>
+  <div id="mapwrap">
+    <div id="map" aria-label="Map of Japan with grid cells colored by the selected indicator"></div>
+    <div id="legend"></div>
+  </div>
+  <aside>
+    <h2 id="cellTitle">Point to a cell</h2>
+    <div class="sub" id="cellSub">Move the pointer over the map, or tap it, to see the values of a cell.</div>
+    <table id="vals"></table>
+    <div class="note">
+      <p><b>Nighttime noise.</b> Outdoor L<sub>night</sub> (22:00–06:00) from the roads of the 2021 Road Traffic Census, at receptors 4 m high that were placed at random within each census small area in proportion to its population (about 10 residents per receptor). The model considers geometric spreading only. Screening by buildings and noise barriers is not included, and roads outside the census are not counted. The floor of the model is 40 dB, which applies to receptors more than 200 m from a census road. A cell shows the population-weighted energy mean of its receptors.</p>
+      <p><b>Near-road NO<sub>2</sub>.</b> The part of the annual mean NO<sub>2</sub> of fiscal year 2022 that the national model assigns to nearby roads. A cell shows the population-weighted mean of its receptors.</p>
+      <p><b>Reading the map.</b> Cells are 0.004° (about 0.4 km), the same as in the enlarged maps of Fig. 1 of the paper. Coarser cells are shown at small scales. Cells without residents are not colored, and gray cells have few residents. Outside cities a cell often holds only one or two receptors, so the value of a single cell is uncertain. The map shows the pattern of exposure. It is not an assessment of individual addresses or buildings.</p>
+      <p>Source: D. Matsushita, “Sleep benefits and neighborhood disparities in the allocation of road traffic noise mitigation in Japan” (submitted). Code: <a href="https://github.com/m138/japan-road-noise-allocation" target="_blank" rel="noopener">github.com/m138/japan-road-noise-allocation</a> (MIT). Background map: GSI Tiles (Geospatial Information Authority of Japan).</p>
+    </div>
+  </aside>
+</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="grid_lnight.js"></script>
+<script src="grid_no2.js"></script>
+<script>
+// Grid data: for each indicator and level, blocks of 256 x 256 cells as 8-bit PNG images (0 no residents, 1 few residents, 3-255 value).
+const D=window.GRID_DATA, B=256;
+const IND={
+  lnight:{name:'Nighttime noise',title:'Nighttime noise L<sub>night</sub> (dB)',unit:'dB',lo:40,hi:60,dec:0,ticks:[40,45,50,55,'60+'],ramp:['#cde2fb','#86b6ef','#3987e5','#256abf','#184f95','#0d366b']},
+  no2:{name:'Near-road NO₂',title:'Near-road NO<sub>2</sub>, fiscal year 2022 (µg/m³)',unit:'µg/m³',lo:0,hi:4,dec:1,ticks:[0,1,2,3,'4+'],ramp:['#fde6da','#f6b393','#ef8a5d','#eb6834','#b9461b','#7a2c0f']}
+};
+const PLACES={japan:[[30.5,128.5],[45.6,146]],tokyo:[35.68,139.76],osaka:[34.69,135.5],nagoya:[35.17,136.9],fukuoka:[33.59,130.4],sapporo:[43.06,141.35],sendai:[38.26,140.88],hiroshima:[34.39,132.46],naha:[26.21,127.68]};
+const CELL=['about 0.4 km','about 1.6 km','about 6 km'];
+let cur='lnight';
+const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const value=(k,c)=>D[k].scale[0]+(c-3)/252*(D[k].scale[1]-D[k].scale[0]);
+const levelOf=z=>z>=10?0:z>=8?1:2;
+
+// Color table of each indicator: code -> RGBA
+for(const k in IND){
+  const I=IND[k], stops=I.ramp.map(hex), lut=new Uint8ClampedArray(1024), few=hex('#e1e0d9');
+  lut.set([few[0],few[1],few[2],255],4);
+  for(let c=3;c<256;c++){
+    const t=Math.min(1,Math.max(0,(value(k,c)-I.lo)/(I.hi-I.lo)))*(stops.length-1), i=Math.min(stops.length-2,Math.floor(t)), f=t-i;
+    for(let j=0;j<3;j++) lut[c*4+j]=Math.round(stops[i][j]+(stops[i+1][j]-stops[i][j])*f);
+    lut[c*4+3]=255;
+  }
+  I.lut=lut;
+}
+
+// Blocks are decoded when a tile first needs them
+const pending={}, ready={};
+function block(k,lev,id){
+  const key=k+'|'+lev+'|'+id;
+  if(key in pending) return pending[key];
+  const b64=D[k].levels[lev].blocks[id];
+  if(!b64){ready[key]=null; return pending[key]=Promise.resolve(null);}
+  return pending[key]=new Promise((res,rej)=>{
+    const im=new Image();
+    im.onload=()=>{
+      const c=document.createElement('canvas'); c.width=c.height=B;
+      const x=c.getContext('2d',{willReadFrequently:true}); x.drawImage(im,0,0);
+      const d=x.getImageData(0,0,B,B).data, a=new Uint8Array(B*B);
+      for(let i=0;i<B*B;i++) a[i]=d[i*4];
+      ready[key]=a; res(a);
+    };
+    im.onerror=rej; im.src='data:image/png;base64,'+b64;
+  });
+}
+const lonOf=(x,z)=>x/Math.pow(2,z)*360-180;
+const latOf=(y,z)=>Math.atan(Math.sinh(Math.PI*(1-2*y/Math.pow(2,z))))*180/Math.PI;
+
+async function render(canvas,coords,k){
+  const lev=levelOf(coords.z), G=D[k].levels[lev], [x0,,y0]=D[k].box, lut=IND[k].lut;
+  const ix=new Int32Array(256), iy=new Int32Array(256), need=new Set();
+  for(let p=0;p<256;p++){
+    ix[p]=Math.floor((lonOf(coords.x+(p+.5)/256,coords.z)-x0)/G.res);
+    iy[p]=Math.floor((latOf(coords.y+(p+.5)/256,coords.z)-y0)/G.res);
+  }
+  for(const cy of new Set(Array.from(iy,v=>Math.floor(v/B)))) for(const cx of new Set(Array.from(ix,v=>Math.floor(v/B))))
+    if(cx>=0&&cy>=0&&cx<G.ncx) need.add(cy*G.ncx+cx);
+  const blocks={}; await Promise.all([...need].map(async id=>{blocks[id]=await block(k,lev,id);}));
+  const ctx=canvas.getContext('2d'), img=ctx.createImageData(256,256), out=img.data;
+  for(let py=0;py<256;py++){
+    const y=iy[py]; if(y<0||y>=G.ny) continue;
+    const cy=Math.floor(y/B), ry=(y%B)*B;
+    for(let px=0;px<256;px++){
+      const x=ix[px]; if(x<0||x>=G.nx) continue;
+      const a=blocks[cy*G.ncx+Math.floor(x/B)]; if(!a) continue;
+      const c=a[ry+x%B]; if(!c) continue;
+      const o=(py*256+px)*4, q=c*4;
+      out[o]=lut[q]; out[o+1]=lut[q+1]; out[o+2]=lut[q+2]; out[o+3]=255;
+    }
+  }
+  ctx.putImageData(img,0,0);
+}
+
+const map=L.map('map',{minZoom:5,maxZoom:14,zoomSnap:1,maxBounds:[[20,115],[50,155]],maxBoundsViscosity:.8});
+map.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>');
+const base=L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png',{minZoom:5,maxZoom:18,attribution:'<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">GSI Tiles</a>'}).addTo(map);
+map.createPane('grid'); const pane=map.getPane('grid'); pane.style.zIndex=350; pane.style.mixBlendMode='multiply';   // the grid tints the background map, so roads and names stay readable
+const Grid=L.GridLayer.extend({createTile(coords,done){
+  const t=document.createElement('canvas'); t.width=t.height=256; t.className='grid-tile';
+  render(t,coords,cur).then(()=>done(null,t),e=>done(e,t)); return t;
+}});
+const grid=new Grid({pane:'grid',tileSize:256,minZoom:5,maxZoom:14,bounds:[[24,122.9],[45.6,146]],updateWhenZooming:false}).addTo(map);
+map.fitBounds(PLACES.japan);
+
+// Legend
+function legend(){
+  const I=IND[cur];
+  document.getElementById('legend').innerHTML='<b>'+I.title+'</b><div class="bar" style="background:linear-gradient(90deg,'+I.ramp.join(',')+')"></div>'
+    +'<div class="ticks">'+I.ticks.map(t=>'<span>'+t+'</span>').join('')+'</div>'
+    +'<div class="row"><i style="background:var(--few)"></i>Few residents</div><div class="row">Not colored: no residents</div>';
+}
+
+// Values of the cell under the pointer
+let mark=null, last=null;
+const fmt=(k,c)=>c==null?'…':c===0?'No residents':c===1?'Few residents':(c===255?'≥ ':'')+value(k,c).toFixed(IND[k].dec)+' '+IND[k].unit;
+function cellAt(latlng){
+  const lev=levelOf(Math.round(map.getZoom())), G=D.lnight.levels[lev], [x0,x1,y0,y1]=D.lnight.box;
+  if(latlng.lng<x0||latlng.lng>=x1||latlng.lat<y0||latlng.lat>=y1) return null;
+  return {lev,G,ix:Math.floor((latlng.lng-x0)/G.res),iy:Math.floor((latlng.lat-y0)/G.res),x0,y0};
+}
+function show(latlng){
+  const c=cellAt(latlng); last=latlng;
+  if(!c){if(mark){mark.remove();mark=null;} return;}
+  const {lev,G,ix,iy,x0,y0}=c, id=Math.floor(iy/B)*G.ncx+Math.floor(ix/B), codes={};
+  for(const k in IND){
+    const key=k+'|'+lev+'|'+id;
+    if(key in ready) codes[k]=ready[key]?ready[key][(iy%B)*B+ix%B]:0;
+    else{codes[k]=null; block(k,lev,id).then(()=>{if(last===latlng) show(latlng);});}
+  }
+  const s=y0+iy*G.res, w=x0+ix*G.res, bounds=[[s,w],[s+G.res,w+G.res]];
+  if(mark) mark.setBounds(bounds); else mark=L.rectangle(bounds,{color:'#e8590c',weight:2,fill:false,interactive:false}).addTo(map);
+  document.getElementById('cellTitle').textContent=(s+G.res/2).toFixed(3)+'°N, '+(w+G.res/2).toFixed(3)+'°E';
+  document.getElementById('cellSub').textContent='Cell of '+CELL[lev]+(lev?'. Zoom in to see cells of about 0.4 km.':'.');
+  document.getElementById('vals').innerHTML=Object.keys(IND).map(k=>'<tr'+(k===cur?' class="on"':'')+'><td>'+IND[k].name+'</td><td>'+fmt(k,codes[k])+'</td></tr>').join('');
+}
+map.on('mousemove',e=>show(e.latlng)); map.on('click',e=>show(e.latlng)); map.on('zoomend',()=>{if(last) show(last);});
+
+// Controls
+document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{
+  cur=b.dataset.ind; document.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c===b));
+  legend(); grid.redraw(); if(last) show(last);
+});
+document.getElementById('place').onchange=e=>{const p=PLACES[e.target.value]; if(Array.isArray(p[0])) map.fitBounds(p); else map.setView(p,11);};
+document.getElementById('opacity').oninput=e=>{pane.style.opacity=e.target.value/100;};
+document.getElementById('base').onchange=e=>{if(e.target.checked) base.addTo(map); else base.remove();};
+legend();
+</script>
+</body>
+</html>

@@ -31,6 +31,7 @@ header p{margin:0;color:var(--muted);font-size:.82rem}
 .seg button+button{border-left:1px solid var(--line)}
 .seg button[aria-pressed="true"]{background:var(--fg);color:var(--panel)}
 .search{margin-left:auto;display:flex;gap:6px}
+.glink{margin-left:auto;font-size:.82rem;color:var(--accent)}
 #search{font:inherit;font-size:.85rem;padding:5px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);width:15em;max-width:52vw}
 #reset{font:inherit;font-size:.82rem;padding:5px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);cursor:pointer}
 main{flex:1;display:grid;grid-template-columns:1fr 320px;min-height:0}
@@ -70,6 +71,7 @@ table.nums td:last-child{color:var(--fg)}
 <header>
   <h1>Low-noise pavement and sleep disturbance from road traffic noise in Japan, by municipality</h1>
   <p>Estimates at 12.3 million receptors linked to 94,112 sections of ordinary roads</p>
+  <a class="glink" href="grid.html">Grid map of noise and NO<sub>2</sub></a>
 </header>
 <div class="controls">
   <div class="chips" id="chips" role="group" aria-label="Indicator"></div>

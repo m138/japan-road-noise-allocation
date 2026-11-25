@@ -4,7 +4,7 @@
 
 <p align="center"><img src="docs/images/map_selected_share.png" width="600" alt="効率配分で低騒音舗装の対象に選ばれる一般道の延長の割合を市区町村別に示した日本地図"></p>
 
-*全国の一般道の延長の10%に低騒音舗装を施工する場合に、効率配分で選ばれる区間の延長が各市区町村の一般道の延長に占める割合。拡大や指標の切り替え（睡眠妨害の超過、住宅地間の格差、公平性の重み付き配分）ができるウェブ地図：https://m138.github.io/japan-road-noise-allocation/ 。左上の枠は沖縄本島。`src/webmap/make_readme_map.py` で作成。*
+*全国の一般道の延長の10%に低騒音舗装を施工する場合に、効率配分で選ばれる区間の延長が各市区町村の一般道の延長に占める割合。拡大や指標の切り替え（睡眠妨害の超過、住宅地間の格差、公平性の重み付き配分）ができるウェブ地図：https://m138.github.io/japan-road-noise-allocation/ 。夜間騒音と道路寄与NO2を全国の約0.4 kmの格子で見られるウェブ地図：https://m138.github.io/japan-road-noise-allocation/grid.html 。左上の枠は沖縄本島。`src/webmap/make_readme_map.py` で作成。*
 
 限られた量の低騒音舗装をどの道路区間に施工すべきかを調べた研究です。全国の人口を代表する1,230万の受音点の夜間道路交通騒音を、一般道の交通センサス区間94,112本に結び付け、同じ施工延長を異なる方法で配分したときの睡眠妨害の削減と住宅地間の格差を比べました。公開データだけを使っています。
 
@@ -35,7 +35,7 @@ python src/paper/build_si_tables.py      # 補足表1〜17（src/paper/si_tables
 
 `data/` のファイルだけで動きます。全体の計算（受音点×区間のエネルギー行列、健康負荷、配分、感度分析、モンテカルロ）の手順、引数、乱数シードは [PIPELINE.md](PIPELINE.md)、入力データと利用条件は [DATA_SOURCES.md](DATA_SOURCES.md) にあります。暴露の推計には [japan-night-road-noise](https://github.com/m138/japan-night-road-noise) と [japan-traffic-no2](https://github.com/m138/japan-traffic-no2) を使います。
 
-上の全国地図と `docs/` のウェブ地図は、効率配分と公平性の重み付き配分の結果を市区町村別に集計した `data/muni_allocation.csv` から、`src/webmap/` のスクリプトで作ります（手順は PIPELINE.md）。市区町村別の値は論文には載せていません。
+上の全国地図と `docs/` のウェブ地図は、効率配分と公平性の重み付き配分の結果を市区町村別に集計した `data/muni_allocation.csv` から、`src/webmap/` のスクリプトで作ります（手順は PIPELINE.md）。市区町村別の値は論文には載せていません。格子のウェブ地図（`docs/grid.html`）は、受音点の夜間騒音と道路寄与NO2を0.004°（約0.4 km、図1の拡大図と同じ格子）ごとに人口で重み付けして平均したもので、`src/webmap/make_grid_data.py` で作ります。
 
 ## ライセンス
 
