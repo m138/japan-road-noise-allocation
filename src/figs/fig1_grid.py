@@ -1,4 +1,5 @@
 # For Fig. 1: receptors aggregated to grid cells (population-weighted mean Lnight and near-road NO2, number with excess high sleep disturbance)
+# NO2road is in ppb, as in the receptor file. The figure script multiplies it by 1.88 to give µg/m³.
 import os
 import numpy as np, pandas as pd, pyarrow.parquet as pq
 B=os.environ.get('F_ROOT','.')+'/'

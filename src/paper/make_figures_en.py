@@ -24,7 +24,7 @@ def pick_font():
         try: font_manager.findfont(f, fallback_to_default=False); return f
         except ValueError: pass
     return 'DejaVu Sans'
-FONT = pick_font(); print('make_figures_en.py, version of 2026-11-25 (PNG, PDF, EPS)'); print('font:', FONT)
+FONT = pick_font(); print('make_figures_en.py, version of 2026-11-26 (PNG, PDF, EPS)'); print('font:', FONT)
 mpl.rcParams.update({'font.family': FONT, 'font.size': 7, 'axes.titlesize': 7.5, 'axes.labelsize': 7, 'xtick.labelsize': 6.5, 'ytick.labelsize': 6.5,
     'legend.fontsize': 6.5, 'axes.edgecolor': '#c3c2b7', 'axes.linewidth': 0.6, 'xtick.color': '#52514e', 'ytick.color': '#52514e', 'axes.labelcolor': '#0b0b0b',
     'xtick.major.width': 0.6, 'ytick.major.width': 0.6, 'xtick.major.size': 2.5, 'ytick.major.size': 2.5, 'axes.spines.top': False, 'axes.spines.right': False,
@@ -59,7 +59,7 @@ def fig1():
     def show(ax, d, var, cmap, vmin, vmax, minpop, lim=None):
         x0, x1, y0, y1 = d['box']; nx, ny = int(d['nx']), int(d['ny'])
         if var == 'L': v = 10 * np.log10(np.maximum(d['Lenergy'], 1e-9)); ok = d['Lw'] >= minpop
-        else: v = d['NO2road']; ok = d['W'] >= minpop
+        else: v = d['NO2road'] * 1.88; ok = d['W'] >= minpop          # the grid files give NO2 in ppb; 1 ppb = 1.88 µg/m³
         rgb = np.ones((ny * nx, 3))                                  # white: no population
         rgb[d['W'] > 0] = mpl.colors.to_rgb('#e1e0d9')               # light gray: few residents
         rgb[ok] = cmap(Normalize(vmin, vmax, clip=True)(v[ok]))[:, :3]
@@ -77,7 +77,7 @@ def fig1():
     gs = fig.add_gridspec(3, 3, height_ratios=[1.25, 1, 1], width_ratios=[1, 1, 0.95], hspace=0.12, wspace=0.08, left=0.01, right=0.99, top=0.97, bottom=0.05)
     nat = load('nat'); ka = load('kanto'); ks = load('kansai')
     UG = 'µg m$^{-3}$'
-    specs = [('L', BLUES, 40, 60, 'Nighttime noise $\\mathit{L}_{night}$ (dB)', 'nighttime noise'), ('N', ORANGES, 0, 4, 'Near-road NO$_2$ (' + UG + ', FY2022)', 'near-road NO$_2$')]
+    specs = [('L', BLUES, 40, 60, 'Nighttime noise $\\mathit{L}_{night}$ (dB)', 'nighttime noise'), ('N', ORANGES, 0, 8, 'Near-road NO$_2$ (' + UG + ', FY2022)', 'near-road NO$_2$')]
     for j, (var, cm, a, b, lab, short) in enumerate(specs):
         ax = fig.add_subplot(gs[0, j]); im = show(ax, nat, var, cm, a, b, 20, (127.5, 146, 30.5, 45.6))
         ax.set_title(r'$\bf{' + 'ab'[j] + '}$   ' + lab, loc='left', color=INK, pad=2, fontsize=7.5)
@@ -85,6 +85,7 @@ def fig1():
         for s in ia.spines.values(): s.set_visible(True); s.set_color('#c3c2b7'); s.set_linewidth(0.5)
         ax.add_patch(plt.Rectangle((139.2, 35.3), 1.0, 0.7, fill=False, ec=INK, lw=0.6)); ax.add_patch(plt.Rectangle((135.05, 34.4), 0.8, 0.6, fill=False, ec=INK, lw=0.6))
         cax = ax.inset_axes([0.5, 0.09, 0.45, 0.03]); cb = fig.colorbar(im, cax=cax, orientation='horizontal', extend='max'); cb.outline.set_visible(False)
+        if var == 'N': cb.set_ticks([0, 2, 4, 6, 8])
         cb.ax.tick_params(labelsize=6.5, length=2); cb.set_label('dB' if var == 'L' else UG, fontsize=6.5, labelpad=1)
         ax2 = fig.add_subplot(gs[1, j]); show(ax2, ka, var, cm, a, b, 3)
         ax2.set_title(r'$\bf{' + 'cd'[j] + '}$   Tokyo area (' + short + ')', loc='left', color=INK, pad=2, fontsize=7.5)
