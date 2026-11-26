@@ -6,7 +6,7 @@ Usage: python src/webmap/make_grid_data.py RECEPTORS_NO2.parquet RECEPTOR_BURDEN
   RECEPTOR_BURDEN.parquet   receptor_burden_v2.parquet (columns rid, pop_w, Lnight_2021)
 Writes OUT_DIR/grid_lnight.js and OUT_DIR/grid_no2.js. Each file holds, for every level, the non-empty blocks of
 256 x 256 cells as 8-bit PNG images in base64. Codes: 0 no residents, 1 few residents, 3-255 the value on a linear
-scale (Lnight 40-75 dB, near-road NO2 0-10 ug/m3). The cells are the same as in Fig. 1c-f of the paper (0.004 degrees).
+scale (Lnight 40-75 dB, near-road NO2 0-20 ug/m3). The receptor file gives NO2 in ppb; it is converted here (1 ppb = 1.88 ug/m3). The cells are the same as in Fig. 1c-f of the paper (0.004 degrees).
 """
 import sys, io, json, base64
 import numpy as np, pandas as pd, pyarrow.parquet as pq
@@ -16,12 +16,13 @@ f_no2, f_burden, out = sys.argv[1:4]
 BOX = (122.9, 146.0, 24.0, 45.6)                     # lon0, lon1, lat0, lat1 (same as the national map of Fig. 1)
 LEVELS = [(0.004, 3), (0.016, 10), (0.064, 20)]      # cell size in degrees, residents below which a cell is shown in gray
 BLOCK = 256
-SCALE = {'lnight': (40.0, 75.0), 'no2': (0.0, 10.0)}
+SCALE = {'lnight': (40.0, 75.0), 'no2': (0.0, 20.0)}
+UG_PER_PPB = 1.88                                   # NO2 at 25 degrees C
 
 N = pq.read_table(f_no2, columns=['rid', 'lon', 'lat', 'road_2022']).to_pandas()
 R = pd.read_parquet(f_burden, columns=['rid', 'pop_w', 'Lnight_2021']).merge(N, on='rid'); del N
 w = R.pop_w.values.astype('float64'); L = R.Lnight_2021.values.astype('float64'); okL = ~np.isnan(L)
-E = np.where(okL, 10 ** (np.nan_to_num(L) / 10), 0.0); road = R.road_2022.values.astype('float64')
+E = np.where(okL, 10 ** (np.nan_to_num(L) / 10), 0.0); road = R.road_2022.values.astype('float64') * UG_PER_PPB
 x0, x1, y0, y1 = BOX
 
 
